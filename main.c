@@ -26,6 +26,22 @@ void PortB_Init(){
 	GPIO_PORTB_DEN_R |= 0x1F;
 }
 
+void PortF_Init(void){ 
+  // Initializing Clock and wait until get stablized
+  SYSCTL_RCGCGPIO_R |= 0x20;
+  while((SYSCTL_PRGPIO_R & 0x20) == 0);
+	
+	// Initializing Port F pins
+  GPIO_PORTF_LOCK_R = magicKey;     
+  GPIO_PORTF_CR_R |= 0x0E;               
+  GPIO_PORTF_AMSEL_R &= ~0x0E;        
+  GPIO_PORTF_PCTL_R &= ~0x0000FFF0;
+  GPIO_PORTF_DIR_R |= 0x0E;            
+  GPIO_PORTF_AFSEL_R &= ~0x0E;               
+  GPIO_PORTF_DEN_R |= 0x0E;
+  GPIO_PORTF_DATA_R &= ~0x0E;	
+}
+
 //Calculating Distance between two consecutive Longitudes and Latitudes and Accumulate total distance
 double distance(double lat1, double lon1, double lat2, double lon2){
   const int R = 6371; //Radius of earth in (km)
