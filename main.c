@@ -41,6 +41,20 @@ void PortF_Init(void){
   GPIO_PORTF_DEN_R |= 0x0E;
   GPIO_PORTF_DATA_R &= ~0x0E;	
 }
+void PortD_Init(){
+ // Initializing Clock and wait until get stablized
+ SYSCTL_RCGCGPIO_R |= 0x08;
+ while((SYSCTL_PRGPIO_R & 0x08) == 0);
+ 
+ // Initializing Port D pins
+ GPIO_PORTD_LOCK_R = magicKey;
+ GPIO_PORTD_CR_R |= 0x0F;
+ GPIO_PORTD_AMSEL_R &= ~0x0F;
+ GPIO_PORTD_PCTL_R &= ~0x0F;
+ GPIO_PORTD_DIR_R |= 0x0F;
+ GPIO_PORTD_AFSEL_R &= ~0x0F;
+ GPIO_PORTD_DEN_R |= 0x0F;
+}
 
 //Calculating Distance between two consecutive Longitudes and Latitudes and Accumulate total distance
 double distance(double lat1, double lon1, double lat2, double lon2){
