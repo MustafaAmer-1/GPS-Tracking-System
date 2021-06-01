@@ -3,3 +3,6 @@
 #include "Math.h"
 
 #define magicKey 0x4C4F434B
+
+// Functions Prototypes
+void PortB_Init();
