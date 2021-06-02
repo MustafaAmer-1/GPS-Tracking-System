@@ -75,3 +75,21 @@ double distance(double lat1, double lon1, double lat2, double lon2){
 double deg2rad(double deg){
   return (deg * PI / 180);
 }
+//Lighting LED
+void led_control(int control) {
+
+	GPIO_PORTF_DATA_R &= ~0xE;
+	GPIO_PORTF_DATA_R |= control;
+}
+
+//Checking the reached destination
+void check_destination() {
+
+	if (totalDis <= 100) {
+		led_control(RED);
+	}
+
+	else if (totalDis > 100) {
+		led_control(GREEN);
+	}
+}
