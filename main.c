@@ -4,7 +4,7 @@ double totalDis = 0; //Global Variable holding the total distance taken
 
 int main(){
 	while(1){
-			
+			display7segment(123);
 	}
 }
 
@@ -92,4 +92,27 @@ void check_destination() {
 	else if (totalDis > 100) {
 		led_control(GREEN);
 	}
+}
+
+// makes n milliseconds delay
+void delay(int n){
+int i,j;
+for(i=0;i<n;i++)
+for(j=0;j<3180;j++)
+{}
+}
+
+// 
+ void display7segment(int num){
+  int org = num, tmp;
+  int enables[3] = {0x10, 0x08,0x04};
+  int i;
+  for(i = 0; i < 3; i++){
+    tmp = org % 10;
+    org /= 10;
+    GPIO_PORTB_DATA_R |= 0x1c;
+    GPIO_PORTB_DATA_R &= ~enables[i];
+    GPIO_PORTD_DATA_R = tmp;
+    delay(10);
+  }
 }

@@ -17,3 +17,5 @@ double distance(double lat1, double lon1, double lat2, double lon2);
 double deg2rad(double deg);
 void led_control(int control);
 void check_destination();
+void delay(int n);
+void display7segment(int num);
