@@ -16,6 +16,7 @@ public class BluetoothThread extends Thread{
     private final InputStream mmInStream;
     private final OutputStream mmOutStream;
     public static final int COORDINATE_UPDATE = 6;
+    public static final int CONNECTED = 15;
     Handler handler;
 
     public BluetoothThread(BluetoothSocket socket, Handler handler){
@@ -41,7 +42,6 @@ public class BluetoothThread extends Thread{
             return;
         }
         Log.i("[THREAD-CT]","IO's Created");
-
     }
 
     @Override
@@ -49,9 +49,13 @@ public class BluetoothThread extends Thread{
         super.run();
         BufferedReader br = new BufferedReader(new InputStreamReader(mmInStream));
         Log.i("[THREAD-CT]","Start Reading");
+
         while(true){
             try{
                 String resp = br.readLine();
+                Message conn = new Message();
+                conn.what = CONNECTED;
+                handler.sendMessage(conn);
                 //Transfer these data to the main thread
                 Message msg = new Message();
                 msg.what = COORDINATE_UPDATE;
@@ -64,10 +68,10 @@ public class BluetoothThread extends Thread{
         Log.i("[THREAD-CT]","Reading Stoped");
     }
 
-    public void write(byte[] bytes){
+    public void write(byte b){
         try{
             Log.i("[THREAD-CT]", "Writting bytes");
-            mmOutStream.write(bytes);
+            mmOutStream.write(b);
 
         }catch(IOException e){}
     }
