@@ -23,12 +23,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.UUID;
@@ -50,9 +44,9 @@ public class MainActivity extends AppCompatActivity {
     private double cur_lat = -1, cur_lon = -1, first_coor = 1;
     private static double totalDistance = 0;
 
-    Button beebButton, locationButton;
+    Button beebButton, locationButton, setDistanceButton;
     ImageButton connectionButton;
-    TextView locationTextView, connectionTextView;
+    TextView locationTextView, connectionTextView, distanceText;
     boolean beebFlag = false;
     public Handler mHandler;
 
@@ -64,9 +58,11 @@ public class MainActivity extends AppCompatActivity {
         Log.i("[BLUETOOTH]", "Sarting Main Tread");
         locationTextView = findViewById(R.id.locationTextView);
         connectionTextView = findViewById(R.id.connectionTextView);
+        distanceText = findViewById(R.id.distanceText);
         locationButton = findViewById(R.id.locationButton);
         beebButton = findViewById(R.id.beebButton);
         connectionButton = findViewById(R.id.connectionButton);
+        setDistanceButton = findViewById(R.id.setDistance);
 
         Log.i("[BLUETOOTH]", "Setting Buttons Listeners");
         beebButton.setOnClickListener(new View.OnClickListener() {
@@ -102,6 +98,27 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     Toast.makeText(MainActivity.this, "No racent data avilable\nCheck GPS connected", Toast.LENGTH_LONG).show();
                     //locationTextView.append("Invaled Data");
+                }
+            }
+        });
+
+        setDistanceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("[BLUETOOTH]", "Sending Target Distance");
+                if (mmSocket.isConnected() && bluetoothThread != null) { //if we have connected to the bluetoothmodule
+                    String dis = distanceText.getText().toString();
+                    if(dis.length() > 0){
+                        bluetoothThread.write((byte)'$');
+                        for (int i = 0 ; i < dis.length() ; i++){
+                            bluetoothThread.write((byte) dis.charAt(i));
+                        }
+                        bluetoothThread.write((byte)'&');
+                        distanceText.setText("");
+                        Toast.makeText(MainActivity.this, "Target Distance Updated", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, "Something went wrong\nCheck Bluetooth Connection", Toast.LENGTH_LONG).show();
                 }
             }
         });

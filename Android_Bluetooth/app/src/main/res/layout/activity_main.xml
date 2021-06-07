@@ -36,15 +36,40 @@
         app:layout_constraintStart_toEndOf="@+id/textView"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/tmp"
-        android:layout_width="339dp"
-        android:layout_height="224dp"
-        android:layout_marginTop="20dp"
-        android:padding="20px"
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/textView">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="30px"
+            android:fontFamily="casual"
+            android:text="Target Distance"
+            android:textSize="50px"
+            android:textStyle="bold"/>
+
+        <EditText
+            android:layout_width="300px"
+            android:layout_height="wrap_content"
+            android:id="@+id/distanceText"
+            android:fontFamily="casual"
+            android:inputType="numberDecimal"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/setDistance"
+            android:text="set"/>
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/beebButton"
@@ -62,13 +87,14 @@
         android:id="@+id/locationButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="208dp"
+        android:background="@drawable/rounded_button"
+        android:padding="15dp"
         android:text="find my gps on maps"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tmp"
-        android:background="@drawable/rounded_button"
-        android:padding="15dp" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
 
     <TextView
         android:id="@+id/connectionTextView"
