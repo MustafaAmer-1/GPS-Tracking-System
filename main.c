@@ -3,6 +3,8 @@
 double totalDis = 0; //Global Variable holding the total distance taken
 
 int main(){
+	PortB_Init();
+	PortD_Init();
 	while(1){
 			display7segment(123);
 	}
