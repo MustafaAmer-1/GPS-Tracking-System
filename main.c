@@ -1,6 +1,11 @@
 #include "Header.h"
 
 double totalDis = 0; //Global Variable holding the total distance taken
+char lat_raw[12] = {'0'};            // latitude array before convertion
+char lon_raw[12] = {'0'};             // longitude array before convertion
+double lat_d, strt_lat, dis_lat;
+double lon_d, strt_lon, dis_lon;
+uint8_t first_coor = 1, distnationReached = 0;
 
 void SystemInit() {
 	SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2));
@@ -55,6 +60,62 @@ void PortF_Init(void){
 
 /* ----------------------- GPS --------------------*/
 
+void GPS_process(void){
+    char data; // for incoming serial data
+    uint8_t end =0;  // indicate end of message
+    uint8_t cnt = 0;  // position counter
+    uint8_t lat_cnt = 1;  // latitude data counter // starts from one to set first char 0 as lon_raw
+    uint8_t log_cnt = 0;  // longitude data counter
+    uint8_t flag;  // GPS flag
+    uint8_t valid = 1;  // GPS flag
+    uint8_t com_cnt = 0;  // comma counter
+    uint8_t i;
+		char header[] = {'$', 'G', 'P', 'R', 'M', 'C'};
+		
+		if(distnationReached) return;
+    
+		strt_lat = lat_d;
+		strt_lon = lon_d;
+        while(!end){
+        while((UART5_FR_R & 0x10) != 0x10){         // Check GPS data
+            data = UART5_DR_R & 0xFF;
+            flag = 1;
+						
+            for (i= 0; i < 6; i++)
+            {
+                if(data == header[i] && cnt == i)
+                    cnt++;
+            }
+            
+            if(data ==',' && cnt == 6){   // count commas in message
+                com_cnt++;
+                flag=0;
+            }
+
+            if(com_cnt == 2 && data == 'V'){
+                end = 1;
+                valid = 0;
+            }
+            
+            if(com_cnt == 3 && flag == 1 && valid)
+                lat_raw[lat_cnt++] =  data;         // latitude
+
+            if(com_cnt == 5 && flag == 1 && valid)
+                lon_raw[log_cnt++] =  data;         // Longitude
+
+            if(data == '*' && com_cnt >= 5){
+                end  = 1;
+            }
+        }
+    }
+		lat_d = stringToNum(lat_raw);
+		lon_d = stringToNum(lon_raw);
+		if(first_coor){
+			strt_lat = lat_d;
+			strt_lon = lon_d;
+			first_coor = 0;
+		}
+}
 
 /* ----------------------- LCD --------------------*/
 
