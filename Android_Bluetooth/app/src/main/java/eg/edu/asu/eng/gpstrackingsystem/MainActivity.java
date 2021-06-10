@@ -202,8 +202,11 @@ public class MainActivity extends AppCompatActivity {
                 //super.handleMessage(msg);
                 if(msg.what == BluetoothThread.COORDINATE_UPDATE){
                     try {
+                        bluetoothThread.write((byte)'*'); // echo to let the boart continue it's work
                         //locationTextView.append((String)msg.obj);
                         String[] tmp = ((String) msg.obj).split("&");
+                        strt_lat = cur_lat;
+                        strt_lon = cur_lon;
                         cur_lat = Double.parseDouble(tmp[0].substring(0, 3)) + Double.parseDouble(tmp[0].substring(3)) / 60;
                         cur_lon = Double.parseDouble(tmp[1].substring(0, 3)) + Double.parseDouble(tmp[1].substring(3)) / 60;
                         if(first_coor == 1) {
