@@ -22,3 +22,4 @@ void delay(int n);
 void display7segment(int num);
 double stringToNum(char *str);
 void GPS_process(void);
+void delayUs(int n);
