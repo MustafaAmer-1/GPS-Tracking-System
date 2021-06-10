@@ -2,6 +2,10 @@
 
 double totalDis = 0; //Global Variable holding the total distance taken
 
+void SystemInit() {
+	SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2));
+}
+
 int main(){
 	PortB_Init();
 	
