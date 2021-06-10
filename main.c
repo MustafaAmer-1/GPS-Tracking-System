@@ -6,6 +6,7 @@ char lon_raw[12] = {'0'};             // longitude array before convertion
 double lat_d, strt_lat, dis_lat;
 double lon_d, strt_lon, dis_lon;
 uint8_t first_coor = 1, distnationReached = 0;
+volatile int target_distance = 100;
 
 void SystemInit() {
 	SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2));
@@ -68,6 +69,19 @@ void PortF_Init(void){
   GPIO_PORTF_DATA_R &= ~0x0E;	
 }
 
+void PortC_Init() {
+	// Initializing Clock and wait until get stablized
+	SYSCTL_RCGCGPIO_R |= 0x04;
+	while ((SYSCTL_PRGPIO_R & 0x04) == 0);
+	// Initializing Port C pins
+	GPIO_PORTC_LOCK_R = magicKey;
+	GPIO_PORTC_CR_R |= 0x10;
+	GPIO_PORTC_AMSEL_R &= ~0x10;
+	GPIO_PORTC_PCTL_R &= ~0x0F0000;
+	GPIO_PORTC_DIR_R |= 0x10;
+	GPIO_PORTC_AFSEL_R &= ~0x10;
+	GPIO_PORTC_DEN_R |= 0x10;
+}
 
 
 
