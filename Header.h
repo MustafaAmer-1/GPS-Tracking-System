@@ -9,7 +9,10 @@
 #define RED 0x02
 #define BLUE 0x04
 #define GREEN 0x08
-
+/* LCD Defines */
+#define RS 0x20 /* PORTA BIT5 mask */
+#define RW 0x40 /* PORTA BIT6 mask */
+#define EN 0x80 /* PORTA BIT7 mask */
 // Functions Prototypes
 void PortA_Init();
 void PortB_Init();
@@ -24,3 +27,4 @@ void display7segment(int num);
 double stringToNum(char *str);
 void GPS_process(void);
 void delayUs(int n);
+void LCD_command(unsigned char command);
