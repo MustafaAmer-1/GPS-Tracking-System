@@ -11,6 +11,7 @@
 #define GREEN 0x08
 
 // Functions Prototypes
+void PortA_Init();
 void PortB_Init();
 void PortF_Init(void);
 double distance(double lat1, double lon1, double lat2, double lon2);

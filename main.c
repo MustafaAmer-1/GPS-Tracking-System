@@ -22,6 +22,21 @@ int main(){
 
 /* ----------------------- Ports Initializations --------------------*/
 
+void PortA_Init(){
+	// Initializing Clock and wait until get stabilized
+	SYSCTL_RCGCGPIO_R |= 0x01;
+	while((SYSCTL_PRGPIO_R & 0x01) == 0);
+	
+	// Initializing Port A pins
+	GPIO_PORTA_LOCK_R = magicKey;
+	GPIO_PORTA_CR_R |= 0xE0;
+	GPIO_PORTA_AMSEL_R &= ~0xE0;
+	GPIO_PORTA_PCTL_R &= ~0xFFF00000;
+	GPIO_PORTA_DIR_R |= 0xE0;
+	GPIO_PORTA_AFSEL_R &= ~0xE0;
+	GPIO_PORTA_DEN_R |= 0xE0;
+}
+
 // Initialization of Port B pins
 void PortB_Init(){
 	// Initializing Clock and wait until get stablized
