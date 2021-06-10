@@ -135,6 +135,22 @@ void GPS_process(void){
 
 /* ----------------------- Bluetooth --------------------*/
 
+// Initialization of Port E pins
+void PortE_Init(){
+	// Initializing Clock and wait until get stablized
+	SYSCTL_RCGCGPIO_R |= 0x10;
+	while((SYSCTL_PRGPIO_R & 0x10) == 0){};
+	// Initializing Port E pins
+	GPIO_PORTE_LOCK_R = magicKey;
+	GPIO_PORTE_CR_R |= 0x13;
+	GPIO_PORTE_AMSEL_R &= ~0x13;
+	GPIO_PORTE_AFSEL_R |= 0x13;
+	GPIO_PORTE_PCTL_R = (GPIO_PORTE_PCTL_R & ~0xF00FF) | (0x00010011);
+	GPIO_PORTE_DEN_R |= 0x13;
+	GPIO_PORTE_DIR_R &= ~0x11;
+	GPIO_PORTE_DIR_R |= 0x02;
+}
+
 
 /* ----------------------- utilities --------------------*/
 
