@@ -180,18 +180,25 @@ void PortE_Init(){
 /* ----------------------- utilities --------------------*/
 
 //Calculating Distance between two consecutive Longitudes and Latitudes and Accumulate total distance
-double distance(double lat1, double lon1, double lat2, double lon2){
-  const int R = 6371; //Radius of earth in (km)
-  double phi1 = deg2rad(lat1);
-  double phi2 = deg2rad(lat2);
-  double delta1 = deg2rad(lat2 - lat1);
-  double delta2 = deg2rad(lon2 - lon1);
-
-  double a = sin(delta1 / 2) * sin(delta1 / 2) + cos(phi1) * cos(phi2) * sin(delta2 / 2) * sin(delta2 / 2);
-  double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-  double d = R * c;
-
-  return totalDis += d;
+double updateDistance(double lat1, double lon1, double lat2, double lon2, uint8_t *coord_cnt){
+	const int R = 6371; //Radius of earth in (km)
+	double phi1, phi2, delta1, delta2, a, c, d;
+	if(*coord_cnt !=1){
+		if(*coord_cnt == 3) *coord_cnt = 1;
+		else *coord_cnt = *coord_cnt + 1;
+		return 0;
+	}
+	*coord_cnt = *coord_cnt + 1;
+	phi1 = deg2rad(lat1);
+	phi2 = deg2rad(lat2);
+	delta1 = deg2rad(lat2 - lat1);
+	delta2 = deg2rad(lon2 - lon1);
+	a = sin(delta1 / 2) * sin(delta1 / 2) + cos(phi1) * cos(phi2) * sin(delta2 / 2) * sin(delta2 / 2);
+	c = 2 * asin(sqrt(a));
+	d = R * c;
+	totalDis += d;
+	check_destination();
+	return totalDis;
 }
 
 // Converting angle unit from degree to radian
