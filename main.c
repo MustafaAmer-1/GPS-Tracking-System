@@ -94,6 +94,21 @@ UART7_LCRH_R = (UART_LCRH_WLEN_8 | UART_LCRH_FEN);
 UART7_CTL_R |= (UART_CTL_UARTEN | UART_CTL_RXE | UART_CTL_TXE);
 }
 
+// Initialization of Port E pins
+void PortE_Init(){
+	// Initializing Clock and wait until get stablized
+	SYSCTL_RCGCGPIO_R |= 0x10;
+	while((SYSCTL_PRGPIO_R & 0x10) == 0){};
+	// Initializing Port E pins
+	GPIO_PORTE_LOCK_R = magicKey;
+	GPIO_PORTE_CR_R |= 0x13;
+	GPIO_PORTE_AMSEL_R &= ~0x13;
+	GPIO_PORTE_AFSEL_R |= 0x13;
+	GPIO_PORTE_PCTL_R = (GPIO_PORTE_PCTL_R & ~0xF00FF) | (0x00010011);
+	GPIO_PORTE_DEN_R |= 0x13;
+	GPIO_PORTE_DIR_R &= ~0x11;
+	GPIO_PORTE_DIR_R |= 0x02;
+}
 
 
 /* ----------------------- GPS --------------------*/
@@ -160,21 +175,7 @@ void GPS_process(void){
 
 /* ----------------------- Bluetooth --------------------*/
 
-// Initialization of Port E pins
-void PortE_Init(){
-	// Initializing Clock and wait until get stablized
-	SYSCTL_RCGCGPIO_R |= 0x10;
-	while((SYSCTL_PRGPIO_R & 0x10) == 0){};
-	// Initializing Port E pins
-	GPIO_PORTE_LOCK_R = magicKey;
-	GPIO_PORTE_CR_R |= 0x13;
-	GPIO_PORTE_AMSEL_R &= ~0x13;
-	GPIO_PORTE_AFSEL_R |= 0x13;
-	GPIO_PORTE_PCTL_R = (GPIO_PORTE_PCTL_R & ~0xF00FF) | (0x00010011);
-	GPIO_PORTE_DEN_R |= 0x13;
-	GPIO_PORTE_DIR_R &= ~0x11;
-	GPIO_PORTE_DIR_R |= 0x02;
-}
+
 
 
 /* ----------------------- utilities --------------------*/
@@ -282,4 +283,15 @@ if (command < 4)
 delay(2); /* command 1 and 2 needs up to 1.64ms */
 else
 delayUs(40); /* all others 40 us */
+}
+
+char *int_to_string(int num, char *end){ 
+// call with end of char array buffer and will return pointer start of the string
+*--end = '\0';
+if(!num) *--end = '0';
+while(num){
+*--end = '0'+num%10;
+num/=10;
+}
+return end;
 }
