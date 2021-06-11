@@ -113,6 +113,19 @@ void PortE_Init(){
 
 /* ----------------------- GPS --------------------*/
 
+void UART5_Init() {
+	SYSCTL_RCGCUART_R |= 0x20;
+	while ((SYSCTL_PRUART_R & 0x20) == 0);
+
+	UART5_CTL_R &= ~UART_CTL_UARTEN;
+	//set buad rate devider
+	UART5_IBRD_R = 104;
+	UART5_FBRD_R = 11;
+	UART5_LCRH_R = (UART_LCRH_WLEN_8 | UART_LCRH_FEN);
+	UART5_CTL_R |= (UART_CTL_UARTEN | UART_CTL_RXE);
+}
+
+
 void GPS_process(void){
     char data; // for incoming serial data
     uint8_t end =0;  // indicate end of message
