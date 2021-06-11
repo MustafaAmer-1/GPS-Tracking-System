@@ -295,3 +295,10 @@ num/=10;
 }
 return end;
 }
+
+void beeb(uint8_t st){ // output for PE2
+	if(st)
+		GPIO_PORTC_DATA_R |= 0x10;	
+	else
+		GPIO_PORTC_DATA_R &= ~0x10;
+}

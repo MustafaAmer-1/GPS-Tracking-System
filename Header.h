@@ -31,3 +31,4 @@ void GPS_process(void);
 void delayUs(int n);
 void LCD_command(unsigned char command);
 char *int_to_string(int num, char *end);
+void beeb(uint8_t st);
