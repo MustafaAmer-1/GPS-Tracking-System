@@ -228,15 +228,17 @@ void led_control(int control) {
 
 //Checking the reached destination
 void check_destination() {
-
-	if (totalDis <= 100) {
+	if (totalDis < target_distance) {
 		led_control(RED);
 	}
-
-	else if (totalDis > 100) {
+	else {
 		led_control(GREEN);
+		distnationReached = 1;
+		dis_lat = lat_d;
+		dis_lon = lon_d;
 	}
 }
+
 
 // makes n milliseconds delay
 void delay(int n){
