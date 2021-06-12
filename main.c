@@ -125,6 +125,15 @@ void UART5_Init() {
 	UART5_CTL_R |= (UART_CTL_UARTEN | UART_CTL_RXE);
 }
 
+double ConvertGpsRaw(char *str){ // done
+char deg[4] = {0};
+uint8_t i;
+for(i = 0; i < 3 ; i++)
+deg[i] = str[i];
+return stringToNum(deg) + (stringToNum(&str[3]) / 60);
+}
+
+
 
 void GPS_process(void){
     char data; // for incoming serial data
@@ -185,6 +194,47 @@ void GPS_process(void){
 
 /* ----------------------- LCD --------------------*/
 
+void LCD_command(unsigned char command){
+GPIO_PORTA_DATA_R = 0; /* RS = 0, R/W = 0 */
+GPIO_PORTB_DATA_R = command;
+GPIO_PORTA_DATA_R = EN; /* pulse E */
+delayUs(0);
+GPIO_PORTA_DATA_R = 0;
+if (command < 4)
+delay(2); /* command 1 and 2 needs up to 1.64ms */
+else
+delayUs(40); /* all others 40 us */
+}
+
+void LCD_init(void){
+delay(20); /* initialization sequence */
+LCD_command(0x30);
+delay(5);
+LCD_command(0x30);
+delayUs(100);
+LCD_command(0x30);
+LCD_command(0x38); /* set 8-bit data, 2-line, 5x7 font */
+LCD_command(0x06); /* move cursor right */
+LCD_command(0x01); /* clear screen, move cursor to home */
+LCD_command(0x0F); /* turn on display, cursor blinking */
+}
+
+void LCD_data(unsigned char data){
+GPIO_PORTA_DATA_R = RS; /* RS = 1, R/W = 0 */
+GPIO_PORTB_DATA_R = data;
+GPIO_PORTA_DATA_R = EN | RS; /* pulse E */
+delayUs(0);
+GPIO_PORTA_DATA_R = 0;
+delayUs(40);
+}
+
+void LCD_write_line(char* str, uint8_t line_num){ // line_num -> 3 for first line without clear
+uint8_t i;
+if(line_num == 1) LCD_command(0x80);
+else if (line_num == 2) LCD_command(0xC0);
+else if (line_num == 3) LCD_command(0x8A);
+for (i = 0; str[i] ; i++) LCD_data(str[i]);
+}
 
 /* ----------------------- Bluetooth --------------------*/
 
@@ -277,19 +327,7 @@ void delayUs(int n){
  {} /* do nothing for 1 us */
 }
 // 
- void display7segment(int num){
-  int org = num, tmp;
-  int enables[3] = {0x10, 0x08,0x04};
-  int i;
-  for(i = 0; i < 3; i++){
-    tmp = org % 10;
-    org /= 10;
-    GPIO_PORTB_DATA_R |= 0x1c;
-    GPIO_PORTB_DATA_R &= ~enables[i];
-    GPIO_PORTD_DATA_R = tmp;
-    delay(10);
-  }
-}
+
  
 double stringToNum(char *str){
     double res = 0;
@@ -309,17 +347,7 @@ double stringToNum(char *str){
     }
     return res;
 }
-void LCD_command(unsigned char command){
-GPIO_PORTA_DATA_R = 0; /* RS = 0, R/W = 0 */
-GPIO_PORTB_DATA_R = command;
-GPIO_PORTA_DATA_R = EN; /* pulse E */
-delayUs(0);
-GPIO_PORTA_DATA_R = 0;
-if (command < 4)
-delay(2); /* command 1 and 2 needs up to 1.64ms */
-else
-delayUs(40); /* all others 40 us */
-}
+
 
 char *int_to_string(int num, char *end){ 
 // call with end of char array buffer and will return pointer start of the string
@@ -338,30 +366,4 @@ void beeb(uint8_t st){ // output for PE2
 	else
 		GPIO_PORTC_DATA_R &= ~0x10;
 }
-void LCD_init(void){
-delay(20); /* initialization sequence */
-LCD_command(0x30);
-delay(5);
-LCD_command(0x30);
-delayUs(100);
-LCD_command(0x30);
-LCD_command(0x38); /* set 8-bit data, 2-line, 5x7 font */
-LCD_command(0x06); /* move cursor right */
-LCD_command(0x01); /* clear screen, move cursor to home */
-LCD_command(0x0F); /* turn on display, cursor blinking */
-}
-void LCD_data(unsigned char data){
-GPIO_PORTA_DATA_R = RS; /* RS = 1, R/W = 0 */
-GPIO_PORTB_DATA_R = data;
-GPIO_PORTA_DATA_R = EN | RS; /* pulse E */
-delayUs(0);
-GPIO_PORTA_DATA_R = 0;
-delayUs(40);
-}
-void LCD_write_line(char* str, uint8_t line_num){ // line_num -> 3 for first line without clear
-uint8_t i;
-if(line_num == 1) LCD_command(0x80);
-else if (line_num == 2) LCD_command(0xC0);
-else if (line_num == 3) LCD_command(0x8A);
-for (i = 0; str[i] ; i++) LCD_data(str[i]);
-}
+
