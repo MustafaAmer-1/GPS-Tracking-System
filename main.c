@@ -193,6 +193,27 @@ void GPS_process(void){
 
 /* ----------------------- utilities --------------------*/
 
+
+//Updating Target Distance 
+void updateTargetDistance(void){
+	uint8_t end = 0;
+	uint8_t pos = 0;
+	char data;
+	char dis[20];
+	while((UART7_FR_R & 0x10) != 0x10 && !end){
+		data = UART7_DR_R & 0xFF;
+		if(data != '&'){
+			dis[pos++] = data;
+		}
+		else{
+			end = 1;
+			dis[pos] = '\0';
+		}
+	}
+	target_distance = stringToNum(dis);
+	led_control(BLUE);
+}
+
 //Calculating Distance between two consecutive Longitudes and Latitudes and Accumulate total distance
 double updateDistance(double lat1, double lon1, double lat2, double lon2, uint8_t *coord_cnt){
 	const int R = 6371; //Radius of earth in (km)
