@@ -35,3 +35,5 @@ void LCD_command(unsigned char command);
 char *int_to_string(int num, char *end);
 void beeb(uint8_t st);
 void LCD_init(void);
+void LCD_data(unsigned char data);
+void LCD_write_line(char* str, uint8_t line_num);

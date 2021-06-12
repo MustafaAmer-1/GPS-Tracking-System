@@ -350,3 +350,18 @@ LCD_command(0x06); /* move cursor right */
 LCD_command(0x01); /* clear screen, move cursor to home */
 LCD_command(0x0F); /* turn on display, cursor blinking */
 }
+void LCD_data(unsigned char data){
+GPIO_PORTA_DATA_R = RS; /* RS = 1, R/W = 0 */
+GPIO_PORTB_DATA_R = data;
+GPIO_PORTA_DATA_R = EN | RS; /* pulse E */
+delayUs(0);
+GPIO_PORTA_DATA_R = 0;
+delayUs(40);
+}
+void LCD_write_line(char* str, uint8_t line_num){ // line_num -> 3 for first line without clear
+uint8_t i;
+if(line_num == 1) LCD_command(0x80);
+else if (line_num == 2) LCD_command(0xC0);
+else if (line_num == 3) LCD_command(0x8A);
+for (i = 0; str[i] ; i++) LCD_data(str[i]);
+}
