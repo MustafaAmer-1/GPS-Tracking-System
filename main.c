@@ -315,3 +315,15 @@ void beeb(uint8_t st){ // output for PE2
 	else
 		GPIO_PORTC_DATA_R &= ~0x10;
 }
+void LCD_init(void){
+delay(20); /* initialization sequence */
+LCD_command(0x30);
+delay(5);
+LCD_command(0x30);
+delayUs(100);
+LCD_command(0x30);
+LCD_command(0x38); /* set 8-bit data, 2-line, 5x7 font */
+LCD_command(0x06); /* move cursor right */
+LCD_command(0x01); /* clear screen, move cursor to home */
+LCD_command(0x0F); /* turn on display, cursor blinking */
+}
