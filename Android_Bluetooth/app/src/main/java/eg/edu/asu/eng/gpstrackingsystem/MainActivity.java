@@ -249,8 +249,8 @@ public class MainActivity extends AppCompatActivity {
                 Math.pow(Math.sin(dLon / 2), 2) *
                         Math.cos(lat1) *
                         Math.cos(lat2);
-        double rad = 6371;
-        double c = 2 * Math.asin(Math.sqrt(a));
+        double rad = 6371.0088;
+        double c = 2000 * Math.asin(Math.sqrt(a));
         totalDistance += rad * c;
         return totalDistance;
     }
