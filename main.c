@@ -5,19 +5,59 @@ char lat_raw[12] = {'0'};            // latitude array before convertion
 char lon_raw[12] = {'0'};             // longitude array before convertion
 double lat_d, strt_lat, dis_lat;
 double lon_d, strt_lon, dis_lon;
+double coord_list[SET_SIZE + 1][2] = {0};
+uint8_t cur_coord_list_size = 0;
 uint8_t first_coor = 1, distnationReached = 0;
 volatile int target_distance = 100;
+char distanceBuffer[20] = {0};
 
 void SystemInit() {
 	SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2));
 }
 
 int main(){
+	char c; // Bluetooth Data
+	char *dis_chars, *tmp_strt_lat, *tmp_strt_lon;
 	PortB_Init();
-	
+	PortE_Init();
+	UART5_Init();
+	UART7_Init();
+	PortF_Init();
+	PortC_Init();
+	PortA_Init();
+	LCD_init();
+	LCD_write_line("Distance: ", 1);
 	while(1){
-			
+		GPS_process();
+		updateDistance();
+		dis_chars = float_to_char(totalDis, distanceBuffer+19, 3);
+		LCD_write_line(dis_chars, 3);
+		sendCoordinates(lat_raw, lon_raw);
+		while(distnationReached){
+			LCD_command(0x01); // clear LCD
+			LCD_write_line("  Distination  ", 1);
+			LCD_write_line("    Reached  ", 2);
+			delay(2000);
+			LCD_command(0x01);
+			LCD_write_line("Distance: ", 1);
+			LCD_write_line(int_to_string(totalDis, distanceBuffer+19), 3);
+			delay(2000);
+		}
+
+	c = UART7_read();
+		if(c == 'A'){
+			beeb(1);
+			led_control(BLUE);
+		}
+		else if(c == 'B'){
+			beeb(0);
+			led_control(OFF);
+		}
+		else if(c == '$'){
+			updateTargetDistance();
+		}
 	}
+	
 }
 
 
@@ -133,11 +173,7 @@ deg[i] = str[i];
 return stringToNum(deg) + (stringToNum(&str[3]) / 60);
 }
 
-
-
-
-
-void GPS_process(void){
+void GPS_process(){
     char data; // for incoming serial data
     uint8_t end =0;  // indicate end of message
     uint8_t cnt = 0;  // position counter
@@ -185,13 +221,6 @@ void GPS_process(void){
             }
         }
     }
-		lat_d = stringToNum(lat_raw);
-		lon_d = stringToNum(lon_raw);
-		if(first_coor){
-			strt_lat = lat_d;
-			strt_lon = lon_d;
-			first_coor = 0;
-		}
 }
 
 /* ----------------------- LCD --------------------*/
@@ -286,26 +315,21 @@ void updateTargetDistance(void){
 	led_control(BLUE);
 }
 
-//Calculating Distance between two consecutive Longitudes and Latitudes and Accumulate total distance
-double updateDistance(double lat1, double lon1, double lat2, double lon2, uint8_t *coord_cnt){
-	const int R = 6371; //Radius of earth in (km)
-	double phi1, phi2, delta1, delta2, a, c, d;
-	if(*coord_cnt !=1){
-		if(*coord_cnt == 3) *coord_cnt = 1;
-		else *coord_cnt = *coord_cnt + 1;
-		return 0;
-	}
-	*coord_cnt = *coord_cnt + 1;
-	phi1 = deg2rad(lat1);
-	phi2 = deg2rad(lat2);
-	delta1 = deg2rad(lat2 - lat1);
-	delta2 = deg2rad(lon2 - lon1);
-	a = sin(delta1 / 2) * sin(delta1 / 2) + cos(phi1) * cos(phi2) * sin(delta2 / 2) * sin(delta2 / 2);
-	c = 2 * asin(sqrt(a));
-	d = R * c;
-	totalDis += d;
-	check_destination();
-	return totalDis;
+//Calculating Distance between two consecutive Longitudes and Latitudes
+double haversine(double lat1, double lon1, double lat2, double lon2){
+    const int R = 6371; //Radius of earth in (km)
+    double phi1, phi2, delta1, delta2, a, c, d;
+	
+  phi1 = deg2rad(lat1);
+  phi2 = deg2rad(lat2);
+  delta1 = deg2rad(lat2 - lat1);
+  delta2 = deg2rad(lon2 - lon1);
+  
+  a = sin(delta1 / 2) * sin(delta1 / 2) + cos(phi1) * cos(phi2) * sin(delta2 / 2) * sin(delta2 / 2);
+  c = 2000 * asin(sqrt(a));
+  d = R * c;
+	
+  return d;
 }
 
 // Converting angle unit from degree to radian
@@ -389,3 +413,57 @@ void beeb(uint8_t st){ // output for PE2
 		GPIO_PORTC_DATA_R &= ~0x10;
 }
 
+char * float_to_char(double x, char *end, int points) {
+    long decimals;  // variable to store the decimals
+    int units;  // variable to store the units (part to left of decimal place)
+    long sf = 1;
+    int i;
+    for (i = 0; i < points; i++){
+        sf = sf*10;
+    }
+    
+    units = (long)x;
+    decimals = (long)((x-units) * sf) % sf;
+
+    while(points--){
+        *--end = (decimals % 10) + '0';
+        decimals /= 10; // repeat for as many decimal places as you need
+    }
+    *--end = '.';
+
+    while (units > 0) {
+        *--end = (units % 10) + '0';
+        units /= 10;
+    }
+    return end;
+}
+
+void updateDistance(){
+    coord_list[cur_coord_list_size][0] = ConvertGpsRaw(lat_raw);
+    coord_list[cur_coord_list_size][1] = ConvertGpsRaw(lon_raw);
+    cur_coord_list_size++;
+
+    if(cur_coord_list_size == SET_SIZE){
+        uint8_t i;
+        lat_d = 0;
+        lon_d = 0;
+
+        for (i = 0; i < SET_SIZE; i++)
+        {
+            lat_d += coord_list[i][0];
+            lon_d += coord_list[i][1];
+        }
+        lat_d /= SET_SIZE;
+        lon_d /= SET_SIZE;
+
+        if(strt_lat != 0 && strt_lon != 0){
+            totalDis += haversine(strt_lat, strt_lon, lat_d, lon_d);
+        }
+
+        strt_lat = lat_d;
+        strt_lon = lon_d;
+        
+        cur_coord_list_size = 0;
+    }
+    check_destination();
+}
