@@ -133,6 +133,17 @@ deg[i] = str[i];
 return stringToNum(deg) + (stringToNum(&str[3]) / 60);
 }
 
+void sendCoordinates(char *lat, char *lon){
+uint8_t i = 0;
+while(lat[i])
+UART7_write(lat[i++]);
+i = 0;
+UART7_write('&');
+while(lon[i])
+UART7_write(lon[i++]);
+UART7_write('\n');
+}
+
 
 
 void GPS_process(void){
