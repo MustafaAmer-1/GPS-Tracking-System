@@ -38,3 +38,5 @@ void LCD_data(unsigned char data);
 void LCD_write_line(char* str, uint8_t line_num);
 double ConvertGpsRaw(char *str);
 void sendCoordinates(char *lat, char *lon);
+char UART7_read();
+void UART7_write(char c);

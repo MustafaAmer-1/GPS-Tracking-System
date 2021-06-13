@@ -133,16 +133,7 @@ deg[i] = str[i];
 return stringToNum(deg) + (stringToNum(&str[3]) / 60);
 }
 
-void sendCoordinates(char *lat, char *lon){
-uint8_t i = 0;
-while(lat[i])
-UART7_write(lat[i++]);
-i = 0;
-UART7_write('&');
-while(lon[i])
-UART7_write(lon[i++]);
-UART7_write('\n');
-}
+
 
 
 
@@ -248,6 +239,26 @@ for (i = 0; str[i] ; i++) LCD_data(str[i]);
 }
 
 /* ----------------------- Bluetooth --------------------*/
+char UART7_read(){
+while((UART7_FR_R & 0x10) == 0x10);
+return UART7_DR_R & 0xFF;
+}
+
+void UART7_write(char c){
+while((UART7_FR_R & UART_FR_TXFF) != 0);
+UART7_DR_R = c;
+}
+
+void sendCoordinates(char *lat, char *lon){
+uint8_t i = 0;
+while(lat[i])
+UART7_write(lat[i++]);
+i = 0;
+UART7_write('&');
+while(lon[i])
+UART7_write(lon[i++]);
+UART7_write('\n');
+}
 
 
 
